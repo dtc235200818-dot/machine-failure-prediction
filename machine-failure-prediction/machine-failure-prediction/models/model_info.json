@@ -1,0 +1,15 @@
+{
+  "best_model": "Random Forest",
+  "features": [
+    "type",
+    "air_temp",
+    "process_temp",
+    "rpm",
+    "torque",
+    "tool_wear",
+    "temp_diff",
+    "power_w",
+    "wear_torque"
+  ],
+  "seed": 42
+}
