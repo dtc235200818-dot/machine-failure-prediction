@@ -1,0 +1,3 @@
+﻿Mô hình,Accuracy,Precision,Recall,F1-score,ROC-AUC
+Logistic Regression,0.953,0.4,0.7647,0.5253,0.97
+Random Forest,0.993,0.9655,0.8235,0.8889,0.9716

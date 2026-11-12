@@ -1,0 +1,79 @@
+{
+  "models": {
+    "Logistic Regression": {
+      "threshold": 0.7916665960793497,
+      "best_params": {
+        "clf__C": 100
+      },
+      "cv_metrics": {
+        "Accuracy": 0.959875,
+        "Precision": 0.4465811965811966,
+        "Recall": 0.7712177121771218,
+        "F1-score": 0.5656292286874154,
+        "ROC-AUC": 0.9602689635383869
+      },
+      "test_metrics": {
+        "Accuracy": 0.953,
+        "Precision": 0.4,
+        "Recall": 0.7647058823529411,
+        "F1-score": 0.5252525252525253,
+        "ROC-AUC": 0.9700021312872975
+      },
+      "feature_effects": {
+        "Loại sản phẩm": -0.005075565928671155,
+        "Nhiệt độ không khí [K]": 0.4991491927217521,
+        "Nhiệt độ quá trình [K]": 0.4138593222773226,
+        "Tốc độ quay [rpm]": 0.4667677442531418,
+        "Mô-men xoắn [Nm]": 0.5256593918447784,
+        "Độ mòn dụng cụ [phút]": 0.15293015101643523
+      }
+    },
+    "Random Forest": {
+      "threshold": 0.4714906541568885,
+      "best_params": {
+        "clf__max_depth": 12,
+        "clf__max_features": 0.5,
+        "clf__min_samples_leaf": 2,
+        "clf__n_estimators": 300
+      },
+      "cv_metrics": {
+        "Accuracy": 0.992875,
+        "Precision": 0.9385245901639344,
+        "Recall": 0.8450184501845018,
+        "F1-score": 0.8893203883495145,
+        "ROC-AUC": 0.9765965055173904
+      },
+      "test_metrics": {
+        "Accuracy": 0.993,
+        "Precision": 0.9655172413793104,
+        "Recall": 0.8235294117647058,
+        "F1-score": 0.8888888888888888,
+        "ROC-AUC": 0.9715625380587019
+      },
+      "feature_effects": {
+        "Loại sản phẩm": 0.04308052104350585,
+        "Nhiệt độ không khí [K]": 0.509868675836815,
+        "Nhiệt độ quá trình [K]": 0.28099548072069724,
+        "Tốc độ quay [rpm]": 0.5397387680773148,
+        "Mô-men xoắn [Nm]": 0.5809898175262671,
+        "Độ mòn dụng cụ [phút]": 0.3292962728570861
+      }
+    }
+  },
+  "best_model": "Random Forest",
+  "features": [
+    "type",
+    "air_temp",
+    "process_temp",
+    "rpm",
+    "torque",
+    "tool_wear",
+    "temp_diff",
+    "power_w",
+    "wear_torque"
+  ],
+  "seed": 42,
+  "n_train": 8000,
+  "n_test": 2000,
+  "failure_rate": 0.0339
+}
