@@ -1,76 +1,87 @@
-# machine-failure-prediction
+# Machine Failure Prediction — MachineCare
 
-Dự đoán hỏng hóc máy phục vụ bảo trì dựa trên dữ liệu cảm biến bằng học máy (Python).
+Ứng dụng Streamlit hỗ trợ dự đoán nguy cơ hỏng hóc máy từ dữ liệu cảm biến AI4I 2020.
 
-**Phạm vi mô hình:** đồ án tập trung so sánh đúng hai thuật toán dễ triển khai:
-- **Logistic Regression:** mô hình cơ sở, dễ giải thích; dùng trọng số lớp để chú ý hơn đến mẫu máy hỏng.
-- **Random Forest:** mô hình tổ hợp nhiều cây quyết định, có thể học quan hệ phi tuyến giữa các thông số cảm biến; dùng `balanced_subsample` để giảm ảnh hưởng của mất cân bằng lớp.
+## Hai mô hình chính
 
-Dữ liệu: **AI4I 2020 Predictive Maintenance Dataset** (UCI Machine Learning Repository), 10.000 mẫu, nhãn `Machine failure` có tỷ lệ dương khoảng 3,39%.
-Giấy phép dữ liệu: CC BY 4.0. Trích dẫn: *AI4I 2020 Predictive Maintenance Dataset (2020), UCI Machine Learning Repository, https://doi.org/10.24432/C5HS5C*.
+Dự án tập trung vào đúng hai thuật toán:
+- **Logistic Regression** — mô hình tuyến tính, dễ giải thích, dùng làm mô hình cơ sở.
+- **Random Forest** — mô hình tổ hợp cây quyết định, có thể học các quan hệ phi tuyến.
 
-## Cấu trúc
+Cả hai mô hình được huấn luyện và lưu riêng để người dùng chủ động lựa chọn khi dự đoán. Dự án vẫn lưu thêm `best_model.joblib`, được chọn theo F1-score trung bình của 5-fold cross-validation trên tập train.
 
-```
-├── data/ai4i2020.csv
-├── src/
-│   ├── preprocess.py      # tiền xử lý, tạo đặc trưng, chia train/test
-│   ├── train.py           # huấn luyện và so sánh Logistic Regression, Random Forest
-│   ├── evaluate.py        # Precision, Recall, F1, ROC-AUC, ma trận nhầm lẫn, ROC
-│   └── predict.py         # dự đoán và mức cảnh báo
-├── app.py                 # giao diện Streamlit
-├── reports/               # bảng chỉ số và biểu đồ đánh giá
-├── models/                # mô hình tốt nhất đã huấn luyện
-└── requirements.txt
-```
+## Tính năng
 
-## Cài đặt và chạy
+1. **Tổng quan:** số mẫu dữ liệu, số mẫu hỏng, tỷ lệ hỏng và các dự đoán gần đây.
+2. **Dự đoán một máy:** nhập sáu thông số cảm biến, chọn một trong hai mô hình và xem xác suất/mức cảnh báo/khuyến nghị.
+3. **Dự đoán hàng loạt:** tải CSV, phân tích nhiều dòng và tải kết quả xuống.
+4. **So sánh mô hình:** Accuracy, Precision, Recall, F1-score, ROC-AUC, ma trận nhầm lẫn và ROC.
+5. **Lịch sử dự đoán:** lưu bằng SQLite, lọc theo mô hình/mức cảnh báo và xuất CSV.
+6. **Thông tin dự án:** giới thiệu thuật toán, dữ liệu và giới hạn sử dụng.
+
+## Cài đặt và chạy trên GitHub Codespaces
+
+Mở Terminal tại thư mục gốc của repository:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\\Scripts\\activate
+source .venv/bin/activate
 pip install -r requirements.txt
-
-python -m src.train              # huấn luyện hai mô hình, tạo báo cáo và lưu mô hình tốt nhất
-python -m src.predict            # thử dự đoán một mẫu
-streamlit run app.py             # mở giao diện web
+python -m src.train
+streamlit run app.py --server.address 0.0.0.0
 ```
 
-## Quy trình xử lý dữ liệu
+Khi Codespaces hỏi về cổng 8501, chọn **Open in Browser**.
 
-1. Đọc dữ liệu cảm biến và chuẩn hóa tên cột.
-2. Loại `UDI`, `Product ID` và các cột dạng hỏng `TWF, HDF, PWF, OSF, RNF` để tránh rò rỉ nhãn. Nhãn `Machine failure` được tạo từ các dạng hỏng này, vì vậy không được dùng chúng làm đầu vào.
-3. Tạo ba đặc trưng dẫn xuất: chênh lệch nhiệt độ, công suất cơ và tích độ mòn với mô-men xoắn.
-4. Điền giá trị thiếu, chuẩn hóa dữ liệu số và mã hóa biến loại `Type` bằng pipeline tiền xử lý.
-5. Chia dữ liệu 80% train / 20% test theo phương pháp phân tầng (`stratify`) để giữ tỷ lệ lớp.
-6. Xử lý mất cân bằng bằng `class_weight="balanced"` cho Logistic Regression và `class_weight="balanced_subsample"` cho Random Forest. Không áp dụng SMOTE để quy trình đơn giản, tránh tạo mẫu tổng hợp và giữ nguyên phân phối dữ liệu kiểm tra.
-7. Dùng Stratified 5-fold cross-validation trên tập train. Chọn mô hình theo F1-score trung bình; sau đó mới đánh giá trên tập test độc lập.
+Windows PowerShell dùng lệnh kích hoạt:
 
-## Hai mô hình được sử dụng
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
-| Nội dung | Logistic Regression | Random Forest |
-|---|---|---|
-| Vai trò | Mô hình cơ sở để đối chiếu | Mô hình phi tuyến để so sánh |
-| Cách hoạt động | Ước lượng xác suất hỏng từ tổ hợp tuyến tính của đặc trưng | Tổng hợp dự đoán từ nhiều cây quyết định |
-| Xử lý mất cân bằng | `class_weight="balanced"` | `class_weight="balanced_subsample"` |
-| Ưu điểm | Nhanh, dễ triển khai và giải thích | Học được quan hệ phi tuyến, ít cần giả định về dữ liệu |
-| Hạn chế | Có thể chưa mô tả tốt quan hệ phức tạp | Khó giải thích hơn và tốn tài nguyên hơn Logistic Regression |
+## Cấu trúc chính
 
-## Đánh giá
+```
+app.py
+src/
+  preprocess.py
+  train.py
+  predict.py
+  evaluate.py
+data/
+  ai4i2020.csv
+models/
+  logistic_regression.joblib
+  random_forest.joblib
+  best_model.joblib
+  model_info.json
+reports/
+  metrics_cv_train.csv
+  metrics_test.csv
+  confusion_matrices.png
+  roc_curves.png
+  prediction_history.db
+requirements.txt
+```
 
-Sử dụng các chỉ số:
-- **Precision:** trong các mẫu được dự đoán hỏng, tỷ lệ dự đoán đúng.
-- **Recall:** trong các máy thực sự hỏng, tỷ lệ được phát hiện.
-- **F1-score:** trung bình điều hòa Precision và Recall; phù hợp khi dữ liệu mất cân bằng.
-- **ROC-AUC:** khả năng phân biệt hai lớp ở nhiều ngưỡng.
-- **Confusion Matrix:** cho biết số dự đoán đúng/sai ở từng lớp.
+## Quy trình học máy
 
-Chạy `python -m src.train` để tạo lại các kết quả mới trong `reports/metrics_cv_train.csv`, `reports/metrics_test.csv`, `reports/confusion_matrices.png` và `reports/roc_curves.png`. Không dùng số liệu cũ trong README thay cho kết quả của lần chạy mới.
+- Chuẩn hóa tên cột, loại bỏ các trường gây rò rỉ nhãn.
+- Tạo đặc trưng dẫn xuất từ nhiệt độ, tốc độ quay, mô-men xoắn và độ mòn.
+- Impute dữ liệu thiếu, chuẩn hóa dữ liệu số và one-hot encode loại máy.
+- Chia train/test có stratify và đánh giá chéo 5-fold trên tập train.
+- Đánh giá trên tập test độc lập; không dùng test để lựa chọn mô hình.
 
-## Mức cảnh báo trong ứng dụng
+## Ngưỡng cảnh báo
 
-Xác suất hỏng được chuyển thành ba mức trong `src/predict.py`: dưới 30% là Bình thường, từ 30% là Sắp hỏng, từ 60% là Hỏng (nguy cơ cao). Ngưỡng nằm ở `THRESHOLD_WARN` và `THRESHOLD_FAIL`, có thể điều chỉnh sau khi đánh giá thực nghiệm.
+- Dưới 30%: Bình thường.
+- Từ 30% đến dưới 60%: Sắp hỏng.
+- Từ 60%: Hỏng/nguy cơ cao.
 
-## Lưu ý về dữ liệu
+Đây là ngưỡng minh họa có thể hiệu chỉnh theo yêu cầu vận hành và đánh giá thực nghiệm, không phải ngưỡng an toàn được chứng nhận.
 
-AI4I 2020 là dữ liệu tổng hợp mô phỏng; mỗi dòng là một mẫu độc lập, không phải chuỗi thời gian. Bộ dữ liệu không có độ rung, áp suất, dòng điện hoặc thời gian sử dụng còn lại (RUL). Vì vậy đồ án chỉ kết luận trong phạm vi các thuộc tính cảm biến có sẵn, không khẳng định dự đoán được thời điểm chính xác máy sẽ hỏng.
+## Giới hạn dữ liệu
+
+AI4I 2020 là bộ dữ liệu mô phỏng. Ứng dụng chỉ ước lượng nguy cơ dựa trên các thuộc tính có trong dữ liệu; không dự báo chính xác thời điểm hỏng, không tính RUL và không thay thế kiểm tra kỹ thuật thực tế.
+
+Nguồn dữ liệu: AI4I 2020 Predictive Maintenance Dataset, UCI Machine Learning Repository, DOI: https://doi.org/10.24432/C5HS5C. License: CC BY 4.0.
